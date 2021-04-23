@@ -1,0 +1,204 @@
+﻿<div class="jumbotron">
+    <h1>Модуль администрирования</h1>
+    <p class="lead">Тестовое задание (WEB-API)</p>
+    <p><a class="btn btn-default" href="https://">Learn more &raquo;</a></p>
+</div>
+<div id="tableBlock"></div>
+<div id="editBlock">
+    <p><b>Редактирование пользователя</b></p>
+    <table>
+        <!--<tr><td><input type="hidden" id="editId" /></td><td></td></tr>-->
+        <tr><td><label>Идентификатор: </label></td><td><input type="number" id="editId" disabled="disabled" /></td></tr>
+        <tr><td><label>Фамилия: </label></td><td><input type="text" id="editSurname" /></td></tr>
+        <tr><td><label>Имя: </label></td><td><input type="text" id="editName" /></td></tr>
+        <tr><td><label>Дата создания: </label></td><td><input type="datetime-local" id="editCreateDate" /></td></tr>
+        <tr><td><label>Дата последнего изменения: </label></td><td><input type="datetime-local" id="editUpdateDate" /></td></tr>
+        <tr><td><label>Статус: </label></td><td><input type="text" id="editStatus" disabled="disabled" /></td></tr>
+    </table>
+    <button id="editUser">Сохранить</button>
+</div>
+
+<div id="createBlock">
+    <p><b>Добавление пользователя</b></p>
+    <table>
+        <tr><td><label hidden="hidden">Идентификатор: </label></td><td><input type="number" id="addIdent" hidden="hidden" /></td></tr>
+        <tr><td><label>Фамилия: </label></td><td><input type="text" id="addSurname" /></td></tr>
+        <tr><td><label>Имя: </label></td><td><input type="text" id="addName" /></td></tr>
+        <tr><td><label>Дата создания: </label></td><td><input type="datetime-local" id="addCreateDate" /></td></tr>
+        <tr><td><label>Дата последнего изменения: </label></td><td><input type="datetime-local" id="addUpdateDate" /></td></tr>
+        <tr><td><label>Статус: </label></td><td><select id="addStatus"><option value="active">Active</option><option value="disabled">Disabled</option><option selected="" value="blocked">Blocked</option></select></td></tr>
+    </table>
+    <button id="addUser">Сохранить</button>
+</div>
+<!--<div position ="absolute">
+    <div id="createTask">
+        <p><b>Добавление задачи</b></p>
+        <table>
+            <tr><td><label>Идентификатор: </label></td><td><input type="number" id="addIdTask" /></td></tr>
+            <tr><td><label>Название: </label></td><td><input type="text" id="addTitl" /></td></tr>
+            <tr><td><label>Описание: </label></td><td><input type="text" id="addDescription" /></td></tr>
+            <tr><td><label>Дата создания: </label></td><td><input type="datetime-local" id="addTCreateDate" /></td></tr>
+            <tr><td><label>Дата последнего изменения: </label></td><td><input type="datetime-local" id="addTUpdateDate" /></td></tr>
+            <tr><td><label>Статус: </label></td><td><input type="text" id="addTStatus" /></td></tr>
+            <tr><td><label>Постановщик: </label></td><td><input type="number" id="addСustomer" /></td></tr>
+            <tr><td><label>Исполнитель: </label></td><td><input type="number" id="addExecutor" /></td></tr>
+        </table>
+    </div>
+</div>-->
+
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            GetAllUsers();
+
+            $("#editUser").click(function (event) {
+                event.preventDefault();
+                EditUser();
+            });
+
+            $("#addUser").click(function (event) {
+                event.preventDefault();
+                AddUser();
+            });
+        });
+        // Получение всех пользователей по ajax-запросу
+        function GetAllUsers() {
+            $("#createBlock").css('display', 'block');
+            $("#editBlock").css('display', 'none');
+            $.ajax({
+                url: '/api/values',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    WriteResponse(data);
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+
+        // Добавление нового пользователя
+        function AddUser() {
+            // получаем значение для добавления пользователя
+            var user = {
+                Id: $('#addIdent').val(),
+                Surname: $('#addSurname').val(),
+                Name: $('#addName').val(),
+                CreateDate: $('#addCreateDate').val(),
+                UpdateDate: $('#addUpdateDate').val(),
+                Status: $('#addStatus').val()
+            };
+
+            $.ajax({
+                url: '/api/values/',
+                type: 'POST',
+                data: JSON.stringify(user),
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    GetAllUsers();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        // удаление пользователя
+        function DeleteUser(id) {
+
+            $.ajax({
+                url: '/api/values/' + id,
+                type: 'DELETE',
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    GetAllUsers();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        // редактирование пользователя
+        function EditUser() {
+            var id = $('#editId').val();
+            //получаем новые значения для редактируемого пользователя
+            var user = {
+                Id: $('#editId').val(),
+                Surname: $('#editSurname').val(),
+                Name: $('#editName').val(),
+                CreateDate: $('#editCreateDate').val(),
+                UpdateDate: $('#editUpdateDate').val(),
+                Status: $('#editStatus').val()
+            };
+            $.ajax({
+                url: '/api/values/' + id,
+                type: 'PUT',
+                data: JSON.stringify(user),
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    GetAllUsers();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        // вывод полученных данных на экран
+        function WriteResponse(users) {
+            var strResult = "<table><th>ID</th><th>_Фамилия_</th><th>_Имя_</th><th>_Дата создания_____</th><th>_____Дата обновления_</th><th>__Статус</th>";
+            $.each(users, function (index, user) {
+                strResult += "<tr><td>" + user.Id + "</td><td> " + user.Surname + "</td><td>" + user.Name + "</td><td>" +
+                    user.CreateDate + "</td><td>" + user.UpdateDate + "</td><td>" + user.Status +
+                    "</td><td><a id='editItem' data-item='" + user.Id + "' onclick='EditItem(this);' >Редактировать</a></td>" +
+                    "<td><a id='delItem' data-item='" + user.Id + "' onclick='DeleteItem(this);' >Удалить</a></td></tr>";
+            });
+            strResult += "</table>";
+            $("#tableBlock").html(strResult);
+        }
+        // обработчик удаления
+        function DeleteItem(el) {
+            //получаем id удаляемого общекта
+            var id = $(el).attr('data-item');
+            DeleteUser(id);
+        }
+        // обработчик редактирования
+        function EditItem(el) {
+            //получаем id редактируемого объекта
+            var id = $(el).attr('data-item');
+            GetUser(id);
+        }
+        //вывод данных редактируемого пользователя в поля для редактирования
+        function ShowUser(user) {
+            if (user != null) {
+                $("#createBlock").css('display', 'none');
+                $("#editBlock").css('display', 'block');
+                $('#editId').val(user.Id);
+                $('#editSurname').val(user.Surname);
+                $('#editName').val(user.Name);
+                $('#editCreateDate').val(user.CreateDate);
+                $('#editUpdateDate').val(user.UpdateDate);
+                $('#editStatus').val(user.Status);
+            }
+            else {
+                alert("Такого пользователя не существует");
+            }
+        }
+        //запрос пользователя для редактирования
+        function GetUser(id) {
+            $.ajax({
+                url: 'api/values/' + id,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    ShowUser(data);
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+
+    </script>
+}
